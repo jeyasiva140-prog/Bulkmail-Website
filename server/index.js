@@ -129,10 +129,20 @@ function escapeHtml(value) {
   return value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 }
 
-app.use(express.static(path.join(rootDir, 'client', 'dist')));
+// Serve React frontend from root dist folder
+const clientDistPath = path.join(rootDir, 'dist');
+
+app.use(express.static(clientDistPath));
+
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(rootDir, 'client', 'dist', 'index.html'));
+
+  res.sendFile(
+    path.join(clientDistPath, 'index.html'),
+    (err) => {
+      if (err) next(err);
+    }
+  );
 });
 app.use((err, _req, res, _next) => {
   console.error(err);
